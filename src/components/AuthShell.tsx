@@ -1,16 +1,42 @@
 import { useCanGoBack, useRouter } from "@tanstack/react-router";
 import { ArrowLeft, Eye, EyeOff, Lock } from "lucide-react";
 import { useState, type InputHTMLAttributes, type ReactNode } from "react";
-import { cn } from "@/lib/utils";
+import { BrandLogo } from "@/components/BrandLogo";
 import { Field, inputClass } from "@/components/kit";
+import { cn } from "@/lib/utils";
+
+const HERO = {
+  login: {
+    image: "https://images.unsplash.com/photo-1529193591184-b1d58069ecdd?auto=format&fit=crop&w=1200&h=2000&q=80",
+    eyebrow: "Texas oak · Honest smoke",
+    height: "h-[46vh] min-h-[300px] max-h-[420px]",
+  },
+  register: {
+    image: "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=1200&h=2000&q=80",
+    eyebrow: "Join the smokehouse",
+    height: "h-[32vh] min-h-[210px] max-h-[280px]",
+  },
+  forgot: {
+    image: "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=1200&h=2000&q=80",
+    eyebrow: "Account help",
+    height: "h-[40vh] min-h-[260px] max-h-[360px]",
+  },
+} as const;
+
+export const authInputClass = cn(
+  inputClass,
+  "border-white/12 bg-white/[0.06] py-3.5 text-white placeholder:text-white/35 focus:border-primary focus:bg-white/[0.09]",
+);
 
 export function AuthShell({
+  variant,
   title,
   subtitle,
   children,
   footer,
   showBack = true,
 }: {
+  variant: keyof typeof HERO;
   title: string;
   subtitle?: string;
   children: ReactNode;
@@ -19,24 +45,41 @@ export function AuthShell({
 }) {
   const router = useRouter();
   const canGoBack = useCanGoBack();
+  const hero = HERO[variant];
 
   return (
-    <div className="relative min-h-dvh bg-background px-5 pb-[max(1.5rem,env(safe-area-inset-bottom))] pt-[max(1.5rem,env(safe-area-inset-top))]">
-      {showBack && (
-        <button
-          type="button"
-          aria-label="Go back"
-          onClick={() => (canGoBack ? router.history.back() : router.navigate({ to: "/" }))}
-          className="mb-6 flex h-11 w-11 items-center justify-center rounded-xl border border-border bg-card text-foreground"
-        >
-          <ArrowLeft size={18} strokeWidth={2} />
-        </button>
-      )}
+    <div className="relative min-h-dvh bg-background">
+      <div className={cn("relative overflow-hidden", hero.height)}>
+        <img src={hero.image} alt="" className="absolute inset-0 h-full w-full object-cover" />
+        <div className="absolute inset-0 bg-gradient-to-t from-background via-black/45 to-black/30" />
+        <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-background to-transparent" />
 
-      <h1 className="text-3xl font-semibold tracking-tight text-foreground">{title}</h1>
-      {subtitle && <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{subtitle}</p>}
-      <div className="mt-6">{children}</div>
-      {footer}
+        {showBack && (
+          <button
+            type="button"
+            aria-label="Go back"
+            onClick={() => (canGoBack ? router.history.back() : router.navigate({ to: "/" }))}
+            className="absolute left-4 top-[max(0.85rem,env(safe-area-inset-top))] z-10 flex h-11 w-11 items-center justify-center border border-white/25 bg-black/45 text-white"
+          >
+            <ArrowLeft size={18} strokeWidth={2} />
+          </button>
+        )}
+
+        <div className="absolute bottom-5 left-5 right-5 z-10">
+          <div className="inline-block bg-black/50 px-2 py-1">
+            <BrandLogo className={cn("w-auto", variant === "register" ? "h-12" : "h-[4.25rem]")} />
+          </div>
+          <p className="mt-2 text-[10px] font-semibold uppercase tracking-[0.28em] text-[#F99B1C]">{hero.eyebrow}</p>
+        </div>
+      </div>
+
+      <div className="relative z-10 px-5 pb-[max(1.5rem,env(safe-area-inset-bottom))] pt-1">
+        <div className="mb-3 h-0.5 w-10 bg-primary" />
+        <h1 className="text-[1.85rem] font-semibold leading-tight tracking-tight text-white">{title}</h1>
+        {subtitle && <p className="mt-2 max-w-[22rem] text-sm leading-relaxed text-white/70">{subtitle}</p>}
+        <div className="mt-6">{children}</div>
+        {footer}
+      </div>
     </div>
   );
 }
@@ -49,9 +92,9 @@ export function AuthInput({
   return (
     <div className="relative">
       {icon && (
-        <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">{icon}</span>
+        <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-white/45">{icon}</span>
       )}
-      <input {...props} className={cn(inputClass, icon && "pl-10", className)} />
+      <input {...props} className={cn(authInputClass, icon && "pl-10", className)} />
     </div>
   );
 }
@@ -75,7 +118,7 @@ export function PasswordField({
           type="button"
           aria-label={show ? "Hide password" : "Show password"}
           onClick={() => setShow((s) => !s)}
-          className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 text-muted-foreground"
+          className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 text-white/45 hover:text-white"
         >
           {show ? <EyeOff size={16} strokeWidth={2} /> : <Eye size={16} strokeWidth={2} />}
         </button>
@@ -84,19 +127,19 @@ export function PasswordField({
   );
 }
 
-export function SocialAuth({ onContinue }: { onContinue: () => void }) {
+export function SocialAuth({ onContinue, label = "or continue with" }: { onContinue: () => void; label?: string }) {
   return (
     <>
-      <div className="my-5 flex items-center gap-3 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
-        <span className="h-px flex-1 bg-border" />
-        or continue with
-        <span className="h-px flex-1 bg-border" />
+      <div className="my-5 flex items-center gap-3 text-[10px] font-semibold uppercase tracking-widest text-white/40">
+        <span className="h-px flex-1 bg-white/12" />
+        {label}
+        <span className="h-px flex-1 bg-white/12" />
       </div>
       <div className="grid grid-cols-2 gap-3">
         <button
           type="button"
           onClick={onContinue}
-          className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-border bg-card px-3 py-3 text-sm font-semibold text-foreground hover:bg-muted"
+          className="inline-flex min-h-12 items-center justify-center gap-2 border border-white/15 bg-white/[0.06] px-3 py-3 text-sm font-semibold text-white hover:bg-white/10"
         >
           <GoogleMark />
           Google
@@ -104,7 +147,7 @@ export function SocialAuth({ onContinue }: { onContinue: () => void }) {
         <button
           type="button"
           onClick={onContinue}
-          className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-border bg-card px-3 py-3 text-sm font-semibold text-foreground hover:bg-muted"
+          className="inline-flex min-h-12 items-center justify-center gap-2 border border-white/15 bg-white/[0.06] px-3 py-3 text-sm font-semibold text-white hover:bg-white/10"
         >
           <AppleMark />
           Apple

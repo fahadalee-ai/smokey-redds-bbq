@@ -9,50 +9,414 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as IndexRouteImport } from './routes/index'
+import { Route as AppRouteImport } from './routes/_app'
+import { Route as CartRouteImport } from './routes/cart'
+import { Route as CheckoutRouteImport } from './routes/checkout'
+import { Route as ForgotRouteImport } from './routes/forgot'
+import { Route as LoginRouteImport } from './routes/login'
+import { Route as NotificationsRouteImport } from './routes/notifications'
+import { Route as RegisterRouteImport } from './routes/register'
+import { Route as ReviewsRouteImport } from './routes/reviews'
+import { Route as RewardsRouteImport } from './routes/rewards'
+import { Route as SplashRouteImport } from './routes/splash'
+import { Route as WelcomeRouteImport } from './routes/welcome'
+import { Route as AppIndexRouteImport } from './routes/_app/index'
+import { Route as AppLocationRouteImport } from './routes/_app/location'
+import { Route as AppMenuRouteImport } from './routes/_app/menu'
+import { Route as AppOrdersRouteImport } from './routes/_app/orders'
+import { Route as AppProfileRouteImport } from './routes/_app/profile'
+import { Route as MenuIdRouteImport } from './routes/menu/$id'
+import { Route as OrdersIdRouteImport } from './routes/orders/$id'
 
-const IndexRoute = IndexRouteImport.update({
+const AppRoute = AppRouteImport.update({
+  id: '/_app',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CartRoute = CartRouteImport.update({
+  id: '/cart',
+  path: '/cart',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CheckoutRoute = CheckoutRouteImport.update({
+  id: '/checkout',
+  path: '/checkout',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ForgotRoute = ForgotRouteImport.update({
+  id: '/forgot',
+  path: '/forgot',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const NotificationsRoute = NotificationsRouteImport.update({
+  id: '/notifications',
+  path: '/notifications',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RegisterRoute = RegisterRouteImport.update({
+  id: '/register',
+  path: '/register',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ReviewsRoute = ReviewsRouteImport.update({
+  id: '/reviews',
+  path: '/reviews',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RewardsRoute = RewardsRouteImport.update({
+  id: '/rewards',
+  path: '/rewards',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SplashRoute = SplashRouteImport.update({
+  id: '/splash',
+  path: '/splash',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const WelcomeRoute = WelcomeRouteImport.update({
+  id: '/welcome',
+  path: '/welcome',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AppIndexRoute = AppIndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppLocationRoute = AppLocationRouteImport.update({
+  id: '/location',
+  path: '/location',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppMenuRoute = AppMenuRouteImport.update({
+  id: '/menu',
+  path: '/menu',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppOrdersRoute = AppOrdersRouteImport.update({
+  id: '/orders',
+  path: '/orders',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppProfileRoute = AppProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => AppRoute,
+} as any)
+const MenuIdRoute = MenuIdRouteImport.update({
+  id: '/menu/$id',
+  path: '/menu/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OrdersIdRoute = OrdersIdRouteImport.update({
+  id: '/orders/$id',
+  path: '/orders/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
 
 export interface FileRoutesByFullPath {
-  '/': typeof IndexRoute
+  '/': typeof AppIndexRoute
+  '/cart': typeof CartRoute
+  '/checkout': typeof CheckoutRoute
+  '/forgot': typeof ForgotRoute
+  '/login': typeof LoginRoute
+  '/notifications': typeof NotificationsRoute
+  '/register': typeof RegisterRoute
+  '/reviews': typeof ReviewsRoute
+  '/rewards': typeof RewardsRoute
+  '/splash': typeof SplashRoute
+  '/welcome': typeof WelcomeRoute
+  '/location': typeof AppLocationRoute
+  '/menu': typeof AppMenuRoute
+  '/orders': typeof AppOrdersRoute
+  '/profile': typeof AppProfileRoute
+  '/menu/$id': typeof MenuIdRoute
+  '/orders/$id': typeof OrdersIdRoute
 }
 export interface FileRoutesByTo {
-  '/': typeof IndexRoute
+  '/cart': typeof CartRoute
+  '/checkout': typeof CheckoutRoute
+  '/forgot': typeof ForgotRoute
+  '/login': typeof LoginRoute
+  '/notifications': typeof NotificationsRoute
+  '/register': typeof RegisterRoute
+  '/reviews': typeof ReviewsRoute
+  '/rewards': typeof RewardsRoute
+  '/splash': typeof SplashRoute
+  '/welcome': typeof WelcomeRoute
+  '/location': typeof AppLocationRoute
+  '/menu': typeof AppMenuRoute
+  '/orders': typeof AppOrdersRoute
+  '/profile': typeof AppProfileRoute
+  '/menu/$id': typeof MenuIdRoute
+  '/orders/$id': typeof OrdersIdRoute
+  '/': typeof AppIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
-  '/': typeof IndexRoute
+  '/_app': typeof AppRouteWithChildren
+  '/cart': typeof CartRoute
+  '/checkout': typeof CheckoutRoute
+  '/forgot': typeof ForgotRoute
+  '/login': typeof LoginRoute
+  '/notifications': typeof NotificationsRoute
+  '/register': typeof RegisterRoute
+  '/reviews': typeof ReviewsRoute
+  '/rewards': typeof RewardsRoute
+  '/splash': typeof SplashRoute
+  '/welcome': typeof WelcomeRoute
+  '/_app/location': typeof AppLocationRoute
+  '/_app/menu': typeof AppMenuRoute
+  '/_app/orders': typeof AppOrdersRoute
+  '/_app/profile': typeof AppProfileRoute
+  '/menu/$id': typeof MenuIdRoute
+  '/orders/$id': typeof OrdersIdRoute
+  '/_app/': typeof AppIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/cart'
+    | '/checkout'
+    | '/forgot'
+    | '/login'
+    | '/notifications'
+    | '/register'
+    | '/reviews'
+    | '/rewards'
+    | '/splash'
+    | '/welcome'
+    | '/location'
+    | '/menu'
+    | '/orders'
+    | '/profile'
+    | '/menu/$id'
+    | '/orders/$id'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/cart'
+    | '/checkout'
+    | '/forgot'
+    | '/login'
+    | '/notifications'
+    | '/register'
+    | '/reviews'
+    | '/rewards'
+    | '/splash'
+    | '/welcome'
+    | '/location'
+    | '/menu'
+    | '/orders'
+    | '/profile'
+    | '/menu/$id'
+    | '/orders/$id'
+    | '/'
+  id:
+    | '__root__'
+    | '/_app'
+    | '/cart'
+    | '/checkout'
+    | '/forgot'
+    | '/login'
+    | '/notifications'
+    | '/register'
+    | '/reviews'
+    | '/rewards'
+    | '/splash'
+    | '/welcome'
+    | '/_app/location'
+    | '/_app/menu'
+    | '/_app/orders'
+    | '/_app/profile'
+    | '/menu/$id'
+    | '/orders/$id'
+    | '/_app/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
-  IndexRoute: typeof IndexRoute
+  AppRoute: typeof AppRouteWithChildren
+  CartRoute: typeof CartRoute
+  CheckoutRoute: typeof CheckoutRoute
+  ForgotRoute: typeof ForgotRoute
+  LoginRoute: typeof LoginRoute
+  NotificationsRoute: typeof NotificationsRoute
+  RegisterRoute: typeof RegisterRoute
+  ReviewsRoute: typeof ReviewsRoute
+  RewardsRoute: typeof RewardsRoute
+  SplashRoute: typeof SplashRoute
+  WelcomeRoute: typeof WelcomeRoute
+  MenuIdRoute: typeof MenuIdRoute
+  OrdersIdRoute: typeof OrdersIdRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/': {
-      id: '/'
+    '/_app': {
+      id: '/_app'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AppRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/cart': {
+      id: '/cart'
+      path: '/cart'
+      fullPath: '/cart'
+      preLoaderRoute: typeof CartRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/checkout': {
+      id: '/checkout'
+      path: '/checkout'
+      fullPath: '/checkout'
+      preLoaderRoute: typeof CheckoutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/forgot': {
+      id: '/forgot'
+      path: '/forgot'
+      fullPath: '/forgot'
+      preLoaderRoute: typeof ForgotRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/notifications': {
+      id: '/notifications'
+      path: '/notifications'
+      fullPath: '/notifications'
+      preLoaderRoute: typeof NotificationsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/register': {
+      id: '/register'
+      path: '/register'
+      fullPath: '/register'
+      preLoaderRoute: typeof RegisterRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/reviews': {
+      id: '/reviews'
+      path: '/reviews'
+      fullPath: '/reviews'
+      preLoaderRoute: typeof ReviewsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/rewards': {
+      id: '/rewards'
+      path: '/rewards'
+      fullPath: '/rewards'
+      preLoaderRoute: typeof RewardsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/splash': {
+      id: '/splash'
+      path: '/splash'
+      fullPath: '/splash'
+      preLoaderRoute: typeof SplashRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/welcome': {
+      id: '/welcome'
+      path: '/welcome'
+      fullPath: '/welcome'
+      preLoaderRoute: typeof WelcomeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_app/': {
+      id: '/_app/'
       path: '/'
       fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
+      preLoaderRoute: typeof AppIndexRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/location': {
+      id: '/_app/location'
+      path: '/location'
+      fullPath: '/location'
+      preLoaderRoute: typeof AppLocationRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/menu': {
+      id: '/_app/menu'
+      path: '/menu'
+      fullPath: '/menu'
+      preLoaderRoute: typeof AppMenuRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/orders': {
+      id: '/_app/orders'
+      path: '/orders'
+      fullPath: '/orders'
+      preLoaderRoute: typeof AppOrdersRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/profile': {
+      id: '/_app/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof AppProfileRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/menu/$id': {
+      id: '/menu/$id'
+      path: '/menu/$id'
+      fullPath: '/menu/$id'
+      preLoaderRoute: typeof MenuIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/orders/$id': {
+      id: '/orders/$id'
+      path: '/orders/$id'
+      fullPath: '/orders/$id'
+      preLoaderRoute: typeof OrdersIdRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
 }
 
+interface AppRouteChildren {
+  AppLocationRoute: typeof AppLocationRoute
+  AppMenuRoute: typeof AppMenuRoute
+  AppOrdersRoute: typeof AppOrdersRoute
+  AppProfileRoute: typeof AppProfileRoute
+  AppIndexRoute: typeof AppIndexRoute
+}
+
+const AppRouteChildren: AppRouteChildren = {
+  AppLocationRoute: AppLocationRoute,
+  AppMenuRoute: AppMenuRoute,
+  AppOrdersRoute: AppOrdersRoute,
+  AppProfileRoute: AppProfileRoute,
+  AppIndexRoute: AppIndexRoute,
+}
+
+const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
-  IndexRoute: IndexRoute,
+  AppRoute: AppRouteWithChildren,
+  CartRoute: CartRoute,
+  CheckoutRoute: CheckoutRoute,
+  ForgotRoute: ForgotRoute,
+  LoginRoute: LoginRoute,
+  NotificationsRoute: NotificationsRoute,
+  RegisterRoute: RegisterRoute,
+  ReviewsRoute: ReviewsRoute,
+  RewardsRoute: RewardsRoute,
+  SplashRoute: SplashRoute,
+  WelcomeRoute: WelcomeRoute,
+  MenuIdRoute: MenuIdRoute,
+  OrdersIdRoute: OrdersIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

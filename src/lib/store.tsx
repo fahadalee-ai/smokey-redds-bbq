@@ -1,248 +1,255 @@
-import { createContext, useContext, useMemo, useState, type ReactNode } from "react";
+import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
+import { toast } from "sonner";
 import { clearStorage, readStorage, writeStorage } from "./storage";
 import {
-  seedActivity,
-  seedCompliance,
-  seedDocuments,
-  seedFieldwork,
-  seedForms,
+  applyPromo,
+  cartTotals,
+  deliveryFeeFor,
+  nextOrderNumber,
+  POINTS_PER_DOLLAR,
+  seedCustomers,
   seedNotifications,
-  seedSupervisor,
-  seedTemplates,
-  seedUsers,
-  type ActivityItem,
-  type AppDocument,
+  seedReviews,
+  STATUS_LABEL,
+  type Address,
   type AppNotification,
-  type ComplianceItem,
-  type FieldworkEntry,
-  type FormRecord,
-  type FormTemplate,
-  type Role,
-  type SupervisionSession,
-  type Supervisor,
-  type User,
-  seedSupervision,
-} from "./mock-data";
+  type CartLine,
+  type Customer,
+  type Order,
+  type OrderStatus,
+  type OrderType,
+  type PaymentMethod,
+  type Review,
+} from "./catalog";
 
-export type Toast = { id: number; title: string; body?: string };
-
-type Prefs = {
-  "Supervision reminders": boolean;
-  "Compliance deadlines": boolean;
-  "Document expirations": boolean;
-  "Pending approvals": boolean;
+type PlaceOrderInput = {
+  type: OrderType;
+  paymentMethod: PaymentMethod;
+  pickupTime?: string;
+  deliveryAddress?: string;
+  deliveryTime?: string;
+  notes: string;
+  promoCode?: string;
 };
 
 type Store = {
-  users: User[];
-  user: User | null;
+  hydrated: boolean;
   onboarded: boolean;
   markOnboarded: () => void;
-  login: (email: string, password: string) => { ok: true } | { ok: false; reason: "invalid" | "admin" };
+  users: Customer[];
+  user: Customer | null;
+  login: (email: string, password: string) => { ok: true } | { ok: false };
   register: (input: {
     firstName: string;
     lastName: string;
     email: string;
     phone: string;
-    bacbNumber?: string;
     password: string;
-    role: Role;
-  }) => { ok: true; email: string } | { ok: false; reason: "exists" };
+    birthday?: string;
+  }) => { ok: true } | { ok: false; reason: "exists" };
   logout: () => void;
-  updateUser: (patch: Partial<User>) => void;
-  supervisor: Supervisor;
-  fieldwork: FieldworkEntry[];
-  addFieldwork: (entry: Omit<FieldworkEntry, "id" | "status">) => void;
-  updateFieldwork: (id: string, patch: Partial<FieldworkEntry>) => void;
-  removeFieldwork: (id: string) => void;
-  supervision: SupervisionSession[];
-  addSupervision: (entry: Omit<SupervisionSession, "id">) => void;
-  compliance: ComplianceItem[];
-  toggleRemind: (id: string) => void;
-  documents: AppDocument[];
-  addDocument: (doc: Omit<AppDocument, "id" | "status" | "uploadedAt"> & { status?: AppDocument["status"] }) => void;
-  replaceDocument: (id: string, name: string) => void;
-  removeDocument: (id: string) => void;
-  templates: FormTemplate[];
-  forms: FormRecord[];
-  submitForm: (record: Omit<FormRecord, "id" | "status" | "submittedAt">) => void;
+  updateProfile: (patch: Partial<Customer>) => void;
+  addAddress: (address: Omit<Address, "id">) => void;
+  cart: CartLine[];
+  addToCart: (line: Omit<CartLine, "id">) => void;
+  updateQty: (id: string, qty: number) => void;
+  removeFromCart: (id: string) => void;
+  clearCart: () => void;
+  cartCount: number;
+  orders: Order[];
+  placeOrder: (input: PlaceOrderInput) => Order | { error: string };
   notifications: AppNotification[];
   markAllRead: () => void;
-  markNotificationRead: (id: string) => void;
-  activity: ActivityItem[];
-  prefs: Prefs;
-  togglePref: (key: keyof Prefs) => void;
-  toasts: Toast[];
-  pushToast: (title: string, body?: string) => void;
-  dismissToast: (id: number) => void;
+  markRead: (id: string) => void;
+  unreadCount: number;
+  reviews: Review[];
+  addReview: (rating: number, text: string, orderId?: string) => void;
 };
 
 const Ctx = createContext<Store | null>(null);
 
-const DEFAULT_PREFS: Prefs = {
-  "Supervision reminders": true,
-  "Compliance deadlines": true,
-  "Document expirations": true,
-  "Pending approvals": true,
+const TRACK: Record<OrderType, OrderStatus[]> = {
+  takeaway: ["received", "preparing", "ready"],
+  delivery: ["received", "preparing", "out_for_delivery", "delivered"],
 };
 
-function loadSessionUser(users: User[]): User | null {
-  const id = readStorage("session");
-  if (!id) return null;
-  return users.find((u) => u.id === id) ?? null;
-}
-
 export function AppProvider({ children }: { children: ReactNode }) {
-  const [users, setUsers] = useState<User[]>(seedUsers);
-  const [user, setUser] = useState<User | null>(() => loadSessionUser(seedUsers));
-  const [onboarded, setOnboarded] = useState(() => readStorage("onboarded") === "1");
-  const [fieldwork, setFieldwork] = useState(seedFieldwork);
-  const [supervision, setSupervision] = useState(seedSupervision);
-  const [compliance, setCompliance] = useState(seedCompliance);
-  const [documents, setDocuments] = useState(seedDocuments);
-  const [forms, setForms] = useState(seedForms);
-  const [notifications, setNotifications] = useState(seedNotifications);
-  const [activity, setActivity] = useState(seedActivity);
-  const [prefs, setPrefs] = useState<Prefs>(DEFAULT_PREFS);
-  const [toasts, setToasts] = useState<Toast[]>([]);
+  const [hydrated, setHydrated] = useState(false);
+  const [onboarded, setOnboarded] = useState(false);
+  const [users, setUsers] = useState<Customer[]>(seedCustomers);
+  const [user, setUser] = useState<Customer | null>(null);
+  const [cart, setCart] = useState<CartLine[]>([]);
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [notifications, setNotifications] = useState<AppNotification[]>(seedNotifications);
+  const [reviews, setReviews] = useState<Review[]>(seedReviews);
+
+  useEffect(() => {
+    setOnboarded(readStorage("onboarded-v4") === "1");
+    const id = readStorage("session");
+    if (id) {
+      const found = seedCustomers.find((u) => u.id === id) ?? users.find((u) => u.id === id);
+      if (found) setUser(found);
+    }
+    setHydrated(true);
+  }, []);
 
   const value = useMemo<Store>(() => {
-    const pushToast = (title: string, body?: string) => {
-      const id = Date.now() + Math.random();
-      setToasts((t) => [...t, { id, title, body }]);
-      setTimeout(() => setToasts((t) => t.filter((x) => x.id !== id)), 3200);
+    const pushNote = (title: string, body: string, type: AppNotification["type"], href: string) => {
+      setNotifications((list) => [
+        { id: `n-${Date.now()}`, title, body, type, time: "Just now", read: false, href },
+        ...list,
+      ]);
+      toast(title, { description: body });
+    };
+
+    const advanceOrder = (orderId: string, steps: OrderStatus[], index: number) => {
+      if (index >= steps.length) return;
+      window.setTimeout(() => {
+        const status = steps[index];
+        setOrders((list) => list.map((o) => (o.id === orderId ? { ...o, status } : o)));
+        const order = { number: "", id: orderId } as Order;
+        setOrders((list) => {
+          const live = list.find((o) => o.id === orderId);
+          if (live) {
+            pushNote(STATUS_LABEL[status], `Order ${live.number} · ${STATUS_LABEL[status]}.`, "order", `/orders/${live.id}`);
+          }
+          return list;
+        });
+        void order;
+        advanceOrder(orderId, steps, index + 1);
+      }, 8000 + index * 4000);
     };
 
     return {
-      users,
-      user,
+      hydrated,
       onboarded,
       markOnboarded: () => {
         setOnboarded(true);
-        writeStorage("onboarded", "1");
+        writeStorage("onboarded-v4", "1");
       },
+      users,
+      user,
       login: (email, password) => {
         const found = users.find((u) => u.email.toLowerCase() === email.trim().toLowerCase());
-        if (!found || found.password !== password) return { ok: false, reason: "invalid" };
-        if (found.role === "admin") return { ok: false, reason: "admin" };
+        if (!found || found.password !== password) return { ok: false };
         setUser(found);
         writeStorage("session", found.id);
-        writeStorage("onboarded", "1");
-        setOnboarded(true);
         return { ok: true };
       },
       register: (input) => {
         if (users.some((u) => u.email.toLowerCase() === input.email.trim().toLowerCase())) {
           return { ok: false, reason: "exists" };
         }
-        const created: User = {
-          id: `u${Date.now()}`,
+        const created: Customer = {
+          id: `c-${Date.now()}`,
           firstName: input.firstName.trim(),
           lastName: input.lastName.trim(),
           email: input.email.trim().toLowerCase(),
           phone: input.phone.trim(),
           password: input.password,
-          role: input.role,
-          bacbNumber: input.bacbNumber?.trim() || undefined,
+          birthday: input.birthday ?? "",
+          joinDate: new Date().toISOString().slice(0, 10),
+          loyaltyPoints: 0,
+          addresses: [],
         };
         setUsers((list) => [...list, created]);
-        writeStorage("onboarded", "1");
-        setOnboarded(true);
-        return { ok: true, email: created.email };
+        setUser(created);
+        writeStorage("session", created.id);
+        return { ok: true };
       },
       logout: () => {
         setUser(null);
         clearStorage("session");
       },
-      updateUser: (patch) => {
+      updateProfile: (patch) => {
         if (!user) return;
         const next = { ...user, ...patch };
         setUser(next);
         setUsers((list) => list.map((u) => (u.id === next.id ? next : u)));
       },
-      supervisor: seedSupervisor,
-      fieldwork,
-      addFieldwork: (entry) => {
-        const next: FieldworkEntry = { ...entry, id: `fw${Date.now()}`, status: "pending" };
-        setFieldwork((list) => [next, ...list]);
-        setActivity((list) => [
-          { id: `a${Date.now()}`, text: `Fieldwork logged — ${entry.hours.toFixed(1)} hrs`, time: "Just now", tone: "orange" },
-          ...list,
-        ]);
-        pushToast("Fieldwork entry saved");
+      addAddress: (address) => {
+        if (!user) return;
+        const next = { ...user, addresses: [...user.addresses, { ...address, id: `a-${Date.now()}` }] };
+        setUser(next);
+        setUsers((list) => list.map((u) => (u.id === next.id ? next : u)));
       },
-      updateFieldwork: (id, patch) => setFieldwork((list) => list.map((e) => (e.id === id ? { ...e, ...patch } : e))),
-      removeFieldwork: (id) => setFieldwork((list) => list.filter((e) => e.id !== id)),
-      supervision,
-      addSupervision: (entry) => {
-        setSupervision((list) => [{ ...entry, id: `sv${Date.now()}` }, ...list]);
-        pushToast(entry.status === "requested" ? "Session requested" : "Submitted for sign-off");
+      cart,
+      addToCart: (line) => {
+        setCart((list) => [...list, { ...line, id: `cl-${Date.now()}` }]);
+        toast("Added to cart", { description: line.name });
       },
-      compliance,
-      toggleRemind: (id) =>
-        setCompliance((list) => list.map((c) => (c.id === id ? { ...c, remind: !c.remind } : c))),
-      documents,
-      addDocument: (doc) => {
-        const next: AppDocument = {
-          ...doc,
-          id: `doc${Date.now()}`,
-          status: doc.status ?? "pending",
-          uploadedAt: new Date().toISOString().slice(0, 10),
-        };
-        setDocuments((list) => [next, ...list]);
-        if (doc.category) {
-          setCompliance((list) =>
-            list.map((c) =>
-              c.category === doc.category
-                ? { ...c, documentId: next.id, status: "current", detail: "Pending review" }
-                : c,
-            ),
-          );
+      updateQty: (id, qty) =>
+        setCart((list) => (qty <= 0 ? list.filter((l) => l.id !== id) : list.map((l) => (l.id === id ? { ...l, qty } : l)))),
+      removeFromCart: (id) => setCart((list) => list.filter((l) => l.id !== id)),
+      clearCart: () => setCart([]),
+      cartCount: cart.reduce((n, l) => n + l.qty, 0),
+      orders,
+      placeOrder: (input) => {
+        if (!user) return { error: "Please sign in." };
+        if (!cart.length) return { error: "Your cart is empty." };
+        const subtotal = cartTotals(cart).subtotal;
+        let discount = 0;
+        let promoCode: string | undefined;
+        if (input.promoCode) {
+          const applied = applyPromo(input.promoCode, subtotal, orders.filter((o) => o.customerId === user.id).length === 0);
+          if ("error" in applied) return { error: applied.error };
+          discount = applied.discount;
+          promoCode = applied.promo.code;
         }
-        pushToast("Document submitted");
-      },
-      replaceDocument: (id, name) => {
-        setDocuments((list) => list.map((d) => (d.id === id ? { ...d, name, status: "pending" } : d)));
-        pushToast("Document resubmitted");
-      },
-      removeDocument: (id) => setDocuments((list) => list.filter((d) => d.id !== id)),
-      templates: seedTemplates,
-      forms,
-      submitForm: (record) => {
-        const next: FormRecord = {
-          ...record,
-          id: `f${Date.now()}`,
-          status: "pending",
-          submittedAt: new Date().toISOString().slice(0, 10),
+        const fee = input.type === "delivery" ? deliveryFeeFor() : 0;
+        if (input.type === "delivery" && subtotal < 18) {
+          return { error: "Delivery needs a $18 minimum." };
+        }
+        const totals = cartTotals(cart, discount, fee);
+        const order: Order = {
+          id: `o-${Date.now()}`,
+          number: nextOrderNumber(orders),
+          customerId: user.id,
+          type: input.type,
+          status: "received",
+          paymentMethod: input.paymentMethod,
+          items: cart.map(({ notes: _n, ...item }) => item),
+          ...totals,
+          promoCode,
+          placedAt: new Date().toISOString(),
+          pickupTime: input.pickupTime,
+          deliveryAddress: input.deliveryAddress,
+          deliveryTime: input.deliveryTime,
+          notes: input.notes,
+          pointsEarned: Math.round(totals.total * POINTS_PER_DOLLAR),
         };
-        setForms((list) => [next, ...list.filter((f) => f.templateId !== record.templateId || f.status !== "todo")]);
-        pushToast("Form submitted");
+        setOrders((list) => [order, ...list]);
+        setCart([]);
+        const nextPoints = user.loyaltyPoints + order.pointsEarned;
+        const nextUser = { ...user, loyaltyPoints: nextPoints };
+        setUser(nextUser);
+        setUsers((list) => list.map((u) => (u.id === nextUser.id ? nextUser : u)));
+        pushNote("Order confirmed", `${order.number} is in. We're firing the pit.`, "order", `/orders/${order.id}`);
+        advanceOrder(order.id, TRACK[order.type], 1);
+        return order;
       },
       notifications,
       markAllRead: () => setNotifications((list) => list.map((n) => ({ ...n, read: true }))),
-      markNotificationRead: (id) =>
-        setNotifications((list) => list.map((n) => (n.id === id ? { ...n, read: true } : n))),
-      activity,
-      prefs,
-      togglePref: (key) => setPrefs((p) => ({ ...p, [key]: !p[key] })),
-      toasts,
-      pushToast,
-      dismissToast: (id) => setToasts((t) => t.filter((x) => x.id !== id)),
+      markRead: (id) => setNotifications((list) => list.map((n) => (n.id === id ? { ...n, read: true } : n))),
+      unreadCount: notifications.filter((n) => !n.read).length,
+      reviews,
+      addReview: (rating, text, orderId) => {
+        if (!user) return;
+        setReviews((list) => [
+          {
+            id: `r-${Date.now()}`,
+            customerName: `${user.firstName} ${user.lastName[0]}.`,
+            date: new Date().toISOString().slice(0, 10),
+            rating,
+            text,
+            orderId,
+          },
+          ...list,
+        ]);
+        toast("Thanks for the review");
+      },
     };
-  }, [
-    users,
-    user,
-    onboarded,
-    fieldwork,
-    supervision,
-    compliance,
-    documents,
-    forms,
-    notifications,
-    activity,
-    prefs,
-    toasts,
-  ]);
+  }, [hydrated, onboarded, users, user, cart, orders, notifications, reviews]);
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }
@@ -252,3 +259,4 @@ export function useApp() {
   if (!ctx) throw new Error("useApp must be used inside AppProvider");
   return ctx;
 }
+

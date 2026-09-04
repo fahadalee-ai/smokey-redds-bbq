@@ -197,9 +197,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
           promoCode = applied.promo.code;
         }
         const fee = input.type === "delivery" ? deliveryFeeFor() : 0;
-        if (input.type === "delivery" && subtotal < 18) {
-          return { error: "Delivery needs a $18 minimum." };
-        }
         const totals = cartTotals(cart, discount, fee);
         const order: Order = {
           id: `o-${Date.now()}`,

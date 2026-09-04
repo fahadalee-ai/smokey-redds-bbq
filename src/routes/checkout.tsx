@@ -2,7 +2,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import { Button, Field, Header, Input, Select } from "@/components/kit";
-import { applyPromo, cartTotals, DELIVERY, deliveryFeeFor, pickupSlots, type OrderType, type PaymentMethod } from "@/lib/catalog";
+import { applyPromo, cartTotals, deliveryFeeFor, pickupSlots, type OrderType, type PaymentMethod } from "@/lib/catalog";
 import { money } from "@/lib/format";
 import { useApp } from "@/lib/store";
 import { cn } from "@/lib/utils";
@@ -57,10 +57,6 @@ function Checkout() {
   function payNow() {
     if (type === "delivery" && !address) {
       toast.error("Add a delivery address.");
-      return;
-    }
-    if (type === "delivery" && cartTotals(cart).subtotal < DELIVERY.minOrder) {
-      toast.error(`Delivery minimum is ${money(DELIVERY.minOrder)}.`);
       return;
     }
     const result = placeOrder({

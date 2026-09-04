@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Header } from "@/components/kit";
+import { Empty, Header, LinkButton } from "@/components/kit";
 import { useApp } from "@/lib/store";
 import { cn } from "@/lib/utils";
 
@@ -23,6 +23,17 @@ function Notifications() {
         }
       />
       <div className="px-4 pb-8">
+        {notifications.length === 0 && (
+          <Empty
+            title="You’re all caught up"
+            body="Truck moves, specials, and order updates will land here."
+            action={
+              <LinkButton to="/" full className="rounded-none">
+                Back to Home
+              </LinkButton>
+            }
+          />
+        )}
         {notifications.map((n) => (
           <Link
             key={n.id}

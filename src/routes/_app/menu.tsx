@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import { Header } from "@/components/kit";
+import { Button, Header } from "@/components/kit";
 import { CartButton } from "@/components/mobile/CartButton";
 import { MenuCard } from "@/components/mobile/MenuCard";
 import { categories, menu } from "@/lib/catalog";
@@ -48,7 +48,20 @@ function MenuPage() {
         {rows.map((item) => (
           <MenuCard key={item.id} item={item} />
         ))}
-        {rows.length === 0 && <p className="py-10 text-center text-sm text-muted-foreground">Nothing matches.</p>}
+        {rows.length === 0 && (
+          <div className="py-10 text-center">
+            <p className="text-sm text-muted-foreground">Nothing matches that search.</p>
+            <Button
+              className="mt-4 rounded-none"
+              onClick={() => {
+                setQ("");
+                setActive("all");
+              }}
+            >
+              Show full menu
+            </Button>
+          </div>
+        )}
       </div>
     </div>
   );

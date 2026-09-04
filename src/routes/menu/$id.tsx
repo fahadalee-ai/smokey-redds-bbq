@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import { Button, Header } from "@/components/kit";
+import { Button, Empty, Header, LinkButton } from "@/components/kit";
 import { QtyStepper } from "@/components/mobile/QtyStepper";
 import { menu, type CustomizationChoice } from "@/lib/catalog";
 import { money } from "@/lib/format";
@@ -46,9 +46,19 @@ function ItemDetail() {
 
   if (!item) {
     return (
-      <div className="p-6">
+      <div>
         <Header title="Item" fallbackTo="/menu" />
-        <p className="text-sm text-muted-foreground">That plate isn’t on the board.</p>
+        <div className="px-4">
+          <Empty
+            title="That plate isn’t on the board"
+            body="It may have sold out or moved. Browse the menu for what’s firing now."
+            action={
+              <LinkButton to="/menu" full className="rounded-none">
+                Browse menu
+              </LinkButton>
+            }
+          />
+        </div>
       </div>
     );
   }
@@ -124,25 +134,30 @@ function ItemDetail() {
           <p className="text-lg font-semibold">{money(unit * qty)}</p>
         </div>
 
-        <Button
-          full
-          className="mt-4 rounded-none"
-          disabled={!item.available}
-          onClick={() => {
-            addToCart({
-              menuItemId: item.id,
-              name: item.name,
-              image: item.image,
-              qty,
-              unitPrice: item.price,
-              customizations,
-              notes,
-            });
-            void navigate({ to: "/cart" });
-          }}
-        >
-          Add to cart · {money(unit * qty)}
-        </Button>
+        {item.available ? (
+          <Button
+            full
+            className="mt-4 rounded-none"
+            onClick={() => {
+              addToCart({
+                menuItemId: item.id,
+                name: item.name,
+                image: item.image,
+                qty,
+                unitPrice: item.price,
+                customizations,
+                notes,
+              });
+              void navigate({ to: "/cart" });
+            }}
+          >
+            Add to cart · {money(unit * qty)}
+          </Button>
+        ) : (
+          <LinkButton to="/menu" full className="mt-4 rounded-none">
+            Browse other plates
+          </LinkButton>
+        )}
       </div>
     </div>
   );

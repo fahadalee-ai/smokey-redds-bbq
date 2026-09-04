@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Button, Header } from "@/components/kit";
+import { Button, Empty, Header, LinkButton } from "@/components/kit";
 import { StatusTrack } from "@/components/mobile/StatusTrack";
 import { lineTotal, STATUS_COLOR, STATUS_LABEL } from "@/lib/catalog";
 import { formatDateTime, money } from "@/lib/format";
@@ -19,7 +19,17 @@ function OrderDetail() {
     return (
       <div>
         <Header title="Order" fallbackTo="/orders" />
-        <p className="px-4 text-sm text-muted-foreground">We couldn’t find that ticket.</p>
+        <div className="px-4">
+          <Empty
+            title="Order not found"
+            body="That ticket isn’t here. Head home and start a new plate, or check your orders."
+            action={
+              <LinkButton to="/" full className="rounded-none">
+                Back to Home
+              </LinkButton>
+            }
+          />
+        </div>
       </div>
     );
   }
@@ -77,8 +87,12 @@ function OrderDetail() {
           </p>
         </div>
 
+        <LinkButton to="/" full className="mt-6 rounded-none">
+          Back to Home
+        </LinkButton>
+
         {done && (
-          <Link to="/reviews" className="mt-5 block">
+          <Link to="/reviews" className="mt-3 block">
             <Button full variant="outline" className="rounded-none">
               Rate this order
             </Button>

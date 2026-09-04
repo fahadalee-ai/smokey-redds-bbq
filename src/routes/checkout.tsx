@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
-import { Button, Field, Header, Input, Select } from "@/components/kit";
+import { Button, Empty, Field, Header, Input, LinkButton, Select } from "@/components/kit";
 import { applyPromo, cartTotals, deliveryFeeFor, pickupSlots, type OrderType, type PaymentMethod } from "@/lib/catalog";
 import { money } from "@/lib/format";
 import { useApp } from "@/lib/store";
@@ -82,7 +82,17 @@ function Checkout() {
     return (
       <div>
         <Header title="Checkout" fallbackTo="/cart" />
-        <p className="px-4 text-sm text-muted-foreground">Cart is empty.</p>
+        <div className="px-4">
+          <Empty
+            title="Nothing to check out"
+            body="Add a plate first, then you can pick pickup or delivery and pay."
+            action={
+              <LinkButton to="/menu" full className="rounded-none">
+                Browse menu
+              </LinkButton>
+            }
+          />
+        </div>
       </div>
     );
   }

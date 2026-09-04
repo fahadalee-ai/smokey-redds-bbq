@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Header } from "@/components/kit";
+import { Header, LinkButton } from "@/components/kit";
 import { loyaltyTiers, promos } from "@/lib/catalog";
 import { useApp } from "@/lib/store";
 
@@ -66,6 +66,10 @@ function Rewards() {
               {p.firstOrderOnly && <p className="text-xs text-secondary">First order only</p>}
             </div>
           ))}
+
+        <LinkButton to="/menu" full className="mt-6 rounded-none">
+          Order now
+        </LinkButton>
       </div>
     </div>
   );

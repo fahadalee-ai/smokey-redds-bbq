@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Header } from "@/components/kit";
+import { Empty, Header, LinkButton } from "@/components/kit";
 import { STATUS_COLOR, STATUS_LABEL } from "@/lib/catalog";
 import { formatDateTime, money } from "@/lib/format";
 import { useApp } from "@/lib/store";
@@ -18,12 +18,15 @@ function Orders() {
       <Header title="Your orders" subtitle="Track pickup and delivery" back={false} />
       <div className="px-4 pb-6">
         {mine.length === 0 && (
-          <p className="py-10 text-center text-sm text-muted-foreground">
-            No tickets yet.{" "}
-            <Link to="/menu" className="font-semibold text-primary">
-              Order something smoky.
-            </Link>
-          </p>
+          <Empty
+            title="No tickets yet"
+            body="When you place an order, tracking and receipts show up here."
+            action={
+              <LinkButton to="/menu" full className="rounded-none">
+                Browse menu
+              </LinkButton>
+            }
+          />
         )}
         {mine.map((o) => (
           <Link key={o.id} to="/orders/$id" params={{ id: o.id }} className="mb-3 block border border-border bg-card p-4">

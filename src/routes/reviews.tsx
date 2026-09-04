@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
-import { Button, Header, Textarea } from "@/components/kit";
+import { Button, Header, LinkButton, Textarea } from "@/components/kit";
 import { formatDate } from "@/lib/format";
 import { useApp } from "@/lib/store";
 import { cn } from "@/lib/utils";
@@ -58,6 +58,10 @@ function Reviews() {
             <p className="mt-1 text-sm text-muted-foreground">{r.text}</p>
           </div>
         ))}
+
+        <LinkButton to="/" full className="mt-6 rounded-none">
+          Back to Home
+        </LinkButton>
       </div>
     </div>
   );

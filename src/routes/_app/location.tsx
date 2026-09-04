@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Navigation } from "lucide-react";
-import { Header } from "@/components/kit";
+import { Header, LinkButton } from "@/components/kit";
 import { formatDate } from "@/lib/format";
 import { HOURS, schedule, truck } from "@/lib/catalog";
 
@@ -36,11 +36,14 @@ function LocationPage() {
             href={maps}
             target="_blank"
             rel="noreferrer"
-            className="mt-3 inline-flex min-h-11 items-center justify-center gap-2 bg-primary px-4 text-sm font-semibold text-white"
+            className="mt-3 inline-flex min-h-11 w-full items-center justify-center gap-2 bg-primary px-4 text-sm font-semibold text-white"
           >
             <Navigation className="size-4" />
             Get directions
           </a>
+          <LinkButton to="/menu" variant="outline" full className="mt-2 rounded-none">
+            Order for pickup
+          </LinkButton>
         </div>
 
         <h2 className="mb-2 mt-6 text-lg font-semibold">Hours</h2>

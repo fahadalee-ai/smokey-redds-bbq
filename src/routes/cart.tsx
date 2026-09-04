@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { Button, Empty, Header } from "@/components/kit";
+import { Button, Empty, Header, LinkButton } from "@/components/kit";
 import { QtyStepper } from "@/components/mobile/QtyStepper";
 import { cartTotals, lineTotal } from "@/lib/catalog";
 import { money } from "@/lib/format";
@@ -62,6 +62,9 @@ function Cart() {
             <Button full className="mt-5 rounded-none" onClick={() => navigate({ to: "/checkout" })}>
               Review & checkout
             </Button>
+            <LinkButton to="/menu" variant="outline" full className="mt-3 rounded-none">
+              Keep shopping
+            </LinkButton>
           </>
         )}
       </div>

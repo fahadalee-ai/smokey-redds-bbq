@@ -153,9 +153,6 @@ function Checkout() {
                 <option>Dinner · 6:00–6:30</option>
               </Select>
             </Field>
-            <p className="text-xs text-muted-foreground">
-              Fee {money(fee)} · {DELIVERY.etaMin}–{DELIVERY.etaMax} min · ${DELIVERY.minOrder} minimum
-            </p>
           </>
         )}
 

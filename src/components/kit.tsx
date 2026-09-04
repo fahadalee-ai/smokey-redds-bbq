@@ -1,6 +1,15 @@
 import { Link, useCanGoBack, useRouter } from "@tanstack/react-router";
-import { ArrowLeft, ChevronRight, X } from "lucide-react";
-import type { ReactNode } from "react";
+import { ArrowLeft, ChevronDown, ChevronRight, X } from "lucide-react";
+import {
+  Children,
+  isValidElement,
+  useEffect,
+  useId,
+  useRef,
+  useState,
+  type ReactNode,
+  type SelectHTMLAttributes,
+} from "react";
 import { cn } from "@/lib/utils";
 
 export function Screen({
@@ -252,8 +261,111 @@ export function Textarea(props: React.TextareaHTMLAttributes<HTMLTextAreaElement
   return <textarea {...props} className={cn(inputClass, "min-h-28", props.className)} />;
 }
 
-export function Select(props: React.SelectHTMLAttributes<HTMLSelectElement>) {
-  return <select {...props} className={cn(inputClass, props.className)} />;
+type SelectOption = { value: string; label: string; disabled?: boolean };
+
+function optionsFromChildren(children: ReactNode): SelectOption[] {
+  return Children.toArray(children).flatMap((child) => {
+    if (!isValidElement<{ value?: string | number; children?: ReactNode; disabled?: boolean }>(child)) return [];
+    if (child.type !== "option") return [];
+    const label = String(child.props.children ?? "");
+    const value = child.props.value !== undefined ? String(child.props.value) : label;
+    return [{ value, label, disabled: Boolean(child.props.disabled) }];
+  });
+}
+
+export function Select({
+  value,
+  onChange,
+  children,
+  className,
+  disabled,
+  name,
+  required,
+  id,
+}: SelectHTMLAttributes<HTMLSelectElement>) {
+  const options = optionsFromChildren(children);
+  const [open, setOpen] = useState(false);
+  const [dropUp, setDropUp] = useState(false);
+  const rootRef = useRef<HTMLDivElement>(null);
+  const listId = useId();
+  const selected = options.find((o) => o.value === String(value ?? "")) ?? options[0];
+
+  useEffect(() => {
+    if (!open) return;
+    const node = rootRef.current;
+    if (node) {
+      const rect = node.getBoundingClientRect();
+      setDropUp(rect.bottom + 220 > window.innerHeight && rect.top > 240);
+    }
+    function onDoc(e: MouseEvent) {
+      if (!rootRef.current?.contains(e.target as Node)) setOpen(false);
+    }
+    function onKey(e: KeyboardEvent) {
+      if (e.key === "Escape") setOpen(false);
+    }
+    document.addEventListener("mousedown", onDoc);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("mousedown", onDoc);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [open]);
+
+  function pick(next: string) {
+    setOpen(false);
+    onChange?.({ target: { value: next, name: name ?? "" } } as React.ChangeEvent<HTMLSelectElement>);
+  }
+
+  return (
+    <div ref={rootRef} className="relative">
+      <button
+        type="button"
+        id={id}
+        disabled={disabled}
+        aria-haspopup="listbox"
+        aria-expanded={open}
+        aria-controls={listId}
+        onClick={() => setOpen((s) => !s)}
+        className={cn(inputClass, "flex items-center justify-between gap-3 text-left", open && "border-primary", className)}
+      >
+        <span className="min-w-0 truncate">{selected?.label ?? ""}</span>
+        <ChevronDown className={cn("size-4 shrink-0 text-muted-foreground transition-transform", open && "rotate-180")} />
+      </button>
+      {open && (
+        <ul
+          id={listId}
+          role="listbox"
+          className={cn(
+            "absolute left-0 right-0 z-50 max-h-56 overflow-auto border border-border bg-card shadow-[0_12px_32px_rgba(0,0,0,0.45)]",
+            dropUp ? "bottom-[calc(100%+4px)]" : "top-[calc(100%+4px)]",
+          )}
+        >
+          {options.map((opt, i) => {
+            const isSelected = opt.value === (selected?.value ?? "");
+            return (
+              <li key={`${opt.value}-${i}`}>
+                <button
+                  type="button"
+                  role="option"
+                  aria-selected={isSelected}
+                  disabled={opt.disabled}
+                  onClick={() => pick(opt.value)}
+                  className={cn(
+                    "flex w-full px-3 py-3 text-left text-sm",
+                    isSelected ? "bg-primary text-primary-foreground" : "text-foreground hover:bg-muted",
+                    opt.disabled && "opacity-50",
+                  )}
+                >
+                  {opt.label}
+                </button>
+              </li>
+            );
+          })}
+        </ul>
+      )}
+      {name ? <input type="hidden" name={name} value={value ?? ""} required={required} /> : null}
+    </div>
+  );
 }
 
 export function Row({

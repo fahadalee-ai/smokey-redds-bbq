@@ -1,27 +1,38 @@
-import { defineConfig } from "@lovable.dev/vite-tanstack-config";
+import { dirname, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
+import tailwindcss from "@tailwindcss/vite";
+import { tanstackRouter } from "@tanstack/router-plugin/vite";
+import react from "@vitejs/plugin-react";
+import { defineConfig } from "vite";
 
-/** Public URL path (trailing slash). Must match Nginx `location` and `PREVIEW_URL` in preview.html. */
-const PRODUCTION_BASE = "/smokey-redds-bbq/";
+const root = dirname(fileURLToPath(import.meta.url));
+
+/** Use `VITE_BASE=/subdir/` for a nested host; Vercel uses `/`. */
+const base = process.env.VITE_BASE || "/";
 
 export default defineConfig({
-  cloudflare: false,
-  vite: {
-    // Subpath must match Nginx and preview.html; use this for dev/preview/build so PM2 `vite preview` matches assets.
-    base: PRODUCTION_BASE,
-    // Allow the domain to access the preview server (if needed for SSR testing)
-    server: {
-        allowedHosts: [
-            "demo.sourapps.com",
-            "localhost",
-            "127.0.0.1",
-        ],
+  base,
+  plugins: [
+    tanstackRouter({
+      target: "react",
+      autoCodeSplitting: true,
+    }),
+    react(),
+    tailwindcss(),
+  ],
+  resolve: {
+    alias: {
+      "@": resolve(root, "src"),
     },
-    preview: {
-        allowedHosts: [
-            "demo.sourapps.com",
-            "localhost",
-            "127.0.0.1",
-        ],
-    },
+  },
+  server: {
+    allowedHosts: ["demo.sourapps.com", "localhost", "127.0.0.1"],
+  },
+  preview: {
+    allowedHosts: ["demo.sourapps.com", "localhost", "127.0.0.1"],
+  },
+  build: {
+    outDir: "dist",
+    emptyOutDir: true,
   },
 });

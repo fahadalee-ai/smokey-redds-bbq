@@ -12,7 +12,7 @@ function AppTabs() {
   const { user, hydrated, onboarded } = useApp();
   const navigate = useNavigate();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
-  const onHome = pathname === "/" || pathname.endsWith("/smokey-redds-bbq") || pathname.endsWith("/smokey-redds-bbq/");
+  const onHome = pathname === "/";
 
   useEffect(() => {
     if (!hydrated || onHome) return;

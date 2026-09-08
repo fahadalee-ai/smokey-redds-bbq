@@ -1,0 +1,1 @@
+import{r as e}from"./useRouter-Du1uWnkX.js";import{t}from"./OnboardingView-UOtTA2uU.js";var n=e();function r(){return(0,n.jsx)(t,{})}export{r as component};

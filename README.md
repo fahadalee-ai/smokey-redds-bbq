@@ -1,16 +1,18 @@
-# Mobile App Starter
+# Smokey Redd's BBQ
 
-Clean React mobile-app starter. Duplicate this project when you begin a new app.
-
-## Development
-
-You need Node.js and npm — [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating).
+Vite + TanStack Router SPA. Deploy on Vercel; the phone frame lives at `/preview.html`.
 
 ```sh
-git clone <this-repository-url>
-cd <repository-name>
 npm i
 npm run dev
 ```
 
-This project was built with [Lovable](https://lovable.dev).
+- App: [http://localhost:5173/](http://localhost:5173/)
+- Phone preview: [http://localhost:5173/preview.html](http://localhost:5173/preview.html)
+
+```sh
+npm run build
+npm run preview
+```
+
+Vercel uses `vercel.json` (static `dist`, SPA rewrites, `preview.html` served as a file).

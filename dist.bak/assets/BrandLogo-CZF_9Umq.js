@@ -1,0 +1,1 @@
+import{r as e}from"./useRouter-Du1uWnkX.js";import{t}from"./utils-Cl1-k_Ki.js";var n=`/assets/logo-Bg9H_Iba.png`,r=e();function i({className:e,alt:i=`Smokey Redd's BBQ`}){return(0,r.jsx)(`img`,{src:n,alt:i,className:t(`object-contain`,e),style:{mixBlendMode:`screen`}})}export{i as t};
